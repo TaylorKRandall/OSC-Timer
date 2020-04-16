@@ -15,8 +15,8 @@ There ideally would be different fonts and layouts (hh:mm:ss or mm:ss) to choose
 The OSC messages will tell the timer to start/stop and add time to the clock. Once different fronts and layouts are available, those will be selectable via OSC as well.
 
 ## Roadmap
-Verify incoming OSC messages
+Verify incoming OSC messages >>> DONE
+Update Label text with OSC parse
 Create Timer
-Define OSC Dictionary for timer
 Optimize Debian image size (remove unneccisary stuff)
 
