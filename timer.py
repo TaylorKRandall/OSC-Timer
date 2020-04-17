@@ -9,7 +9,7 @@ class App(tk.Frame):
 	def __init__(self,master):
 		tk.Frame.__init__(self)
 		self.master=master
-		self.lastClicked=None
+		self.lastClicked=''
 		self.lblFG='white'
 		self.lblBG='black'
 		self.lbl=tk.Label(text=self.lastClicked,fg=self.lblFG,bg=self.lblBG)
@@ -30,9 +30,8 @@ class App(tk.Frame):
 	# will receive message data unpacked in s,x,y
 		for i in args:
 			print(i)
-			self.lastClicked=i+10
-			master.update_idletasks()
-			print(self.lastClicked)
+			self.lastClicked=str(i)
+			self.lbl['text']=self.lastClicked
 			print('exiting handler...')
 
 	def quit(self,*args):
@@ -46,7 +45,6 @@ finished=False
 while not finished:
 	#...
 	osc_process()
-	
 	root.update_idletasks()
 	root.update()
 	#...
