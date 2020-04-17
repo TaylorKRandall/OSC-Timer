@@ -19,4 +19,12 @@ Verify incoming OSC messages >>> DONE
 Update Label text with OSC parse
 Create Timer
 Optimize Debian image size (remove unneccisary stuff)
+Multithread so timer only updates once/sec and doesn't hold up user input during that time
 
+Timer should be able to:
+start, stop, reset to time quickly
+input time of day, then start countown until that time
+input time and countdown for that long
+	last two features will have to store key presses from TouchOSC until a "submit" action is pressed,
+	then format stored value and update lbl.
+	send OSC data back to TouchOSC to update label and confirm desired time?
