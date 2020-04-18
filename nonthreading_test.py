@@ -17,7 +17,7 @@ class App(tk.Frame):
     def __init__(self,master):
         tk.Frame.__init__(self)
         self.master=master
-        self.seconds=5
+        self.seconds=20
         self.lbl=tk.Label(text='OSC Tymer')
         self.lbl.place(relx=0.5, rely=0.5, anchor='center')
 
@@ -29,18 +29,17 @@ class App(tk.Frame):
         return endTime
 
     def startTimer(self,*args):
-        self.t=threading.Thread(target=self.runTimer,kwargs={'endTime':self.updateEndTime()},daemon=True)
-        self.t.start()
+        self.runTimer(self.updateEndTime())
 
     def formatTimer(self,endTime):
         tmr=endTime-datetime.now()
         tmrSplit=str(tmr).split(':')
         return f'{tmrSplit[1]}:{tmrSplit[2][:2]}'
 
-    def runTimer(self,endTime=None):
+    def runTimer(self,endTime):
         while self.formatTimer(endTime)!='00:00':
             self.lbl['text']=self.formatTimer(endTime)
-            time.sleep(1)
+            time.sleep(.5)
         self.lbl['text']='00:00'
         
     def quit(self,*args):
