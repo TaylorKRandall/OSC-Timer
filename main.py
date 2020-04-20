@@ -2,37 +2,42 @@
 
 from kivy.app import App 
 from kivy.clock import Clock 
-from kivy.uix.label import Label
+from kivy.uix.widget import Widget
 from kivy.config import Config
+from kivy.properties import (
+    NumericProperty, ReferenceListProperty, ObjectProperty)
 import time
-from datetime import datetime, timedelta
 
 # Config.set('graphics','fullscreen','auto')
-seconds=20
+print('before TimerApp')
 
-class TimerApp(App):
-    def build(self):
-        timer=Label(text='OSC Tymer', font_size=100)
+seconds=10
+
+class Timer(Widget):
+    # seconds=NumericProperty(20)
+    timer=ObjectProperty('00:00:00')
 
     def updateEndTime(self):
-        endTime=datetime.now()+timedelta(seconds=seconds)
+        endTime=time.time()+seconds
         return endTime
 
-    # def startTimer(self,*args):
-    #     self.runTimer(self.updateEndTime())
+    def startTimer(self):
+        self.runTimer(self.updateEndTime())
 
-    # def formatTimer(self,endTime):
-    #     tmr=endTime-datetime.now()
-    #     tmrSplit=str(tmr).split(':')
-    #     return f'{tmrSplit[1]}:{tmrSplit[2][:2]}'
+    def runTimer(self,endTime):
+        print('starting timer...')
+        for i in range(seconds):
+            tmr=time.gmtime(endTime-time.time())
+            print(time.strftime('%H:%M:%S', tmr))
+            time.sleep(1)
+    
+class TimerApp(App):
+    def build(self):
+        return Timer()
 
-    # def runTimer(self,endTime):
-    #     while self.formatTimer(endTime)!='00:00':
-    #     	pass
-            # timer['text']=self.formatTimer(endTime)
-            # time.sleep(1)
-
-        return timer
+print('beofore .run()')
         
 if __name__ == '__main__':
     TimerApp().run()
+
+print('end...')
