@@ -4,7 +4,7 @@ import time
 from datetime import datetime, timedelta
 import tkinter as tk
 import tkinter.font
-from osc4py3.as_eventloop import *
+from osc4py3.as_allthreads import *
 from osc4py3 import oscmethod as osm
 import threading
 
@@ -49,6 +49,7 @@ class App(tk.Frame):
 
 	def addTime(self,*args):
 		for i in args:
+			print(i)
 			self.seconds+=i
 			updateEndTime()
 			updateLbl()
@@ -56,6 +57,7 @@ class App(tk.Frame):
 
 	def startTimer(self,*args):
 		for i in args:
+			print(i)
 			updateEndTime()
 			self.t=threading.Thread(target=self.runTimer,kwargs={'endTime':self.endTime},daemon=True)
 			self.t.start()
@@ -71,6 +73,7 @@ class App(tk.Frame):
 	def quit(self,*args):
 		self.master.destroy()
 		self.finished=True
+		osc_terminate()
 
 root=tk.Tk()
 app=App(root)
@@ -78,11 +81,10 @@ app=App(root)
 finished=False
 while not finished:
 	#...
-	osc_process()
+	# osc_process()
 
 	root.update_idletasks()
 	root.update()
 	#...
-osc_terminate()
 
 # except Exception as e:
