@@ -1,76 +1,42 @@
-import tkinter as tk
-import time, threading
-from datetime import datetime, timedelta
+from kivy.app import App
+from kivy.uix.widget import Widget
+from kivy.properties import NumericProperty, ReferenceListProperty, ObjectProperty
+from kivy.vector import Vector
+from kivy.clock import Clock
+from random import randint
 
-# seconds=5
-# lbl={'text':'0'}
+l=Label(text='Hello world', font_size='20sp')
 
-# def updateEndTime():
-#     endTime=datetime.now()+timedelta(seconds=seconds)
-#     return endTime
+class PongBall(Widget):
+    velocity_x=NumericProperty(0)
+    velocity_y=NumericProperty(0)
+    velocity=ReferenceListProperty(velocity_x, velocity_y)
 
-# def startTimer(*args):
-#     t=threading.Thread(target=runTimer,kwargs={'endTime':updateEndTime()},daemon=True)
-#     t.start()
+    def move(self):
+        self.pos=Vector(*self.velocity)+self.pos
 
-class App(tk.Frame):
-    def __init__(self,master):
-        tk.Frame.__init__(self)
-        self.master=master
-        self.seconds=5
-        self.lbl=tk.Label(text='OSC Tymer')
-        self.lbl.place(relx=0.5, rely=0.5, anchor='center')
+class PongGame(Widget):
+    ball=ObjectProperty(None)
 
-        master.bind('x',self.quit)
-        master.bind('g',self.startTimer)
+    def serve_ball(self):
+        self.ball.center=self.center
+        self.ball.velocity=Vector(4, 0).rotate(randint(0,360))
 
-    def updateEndTime(self):
-        endTime=datetime.now()+timedelta(seconds=self.seconds)
-        return endTime
+    def update(self, dt):
+        self.ball.move()
+        if (self.ball.y<0) or (self.ball.top>self.height):
+            self.ball.velocity_y *= -1
 
-    def startTimer(self,*args):
-        self.t=threading.Thread(target=self.runTimer,kwargs={'endTime':self.updateEndTime()},daemon=True)
-        self.t.start()
+        if (self.ball.x<0) or (self.ball.right>self.width):
+            self.ball.velocity_x *= -1
 
-    def formatTimer(self,endTime):
-        tmr=endTime-datetime.now()
-        tmrSplit=str(tmr).split(':')
-        return f'{tmrSplit[1]}:{tmrSplit[2][:2]}'
+class PongApp(App):
+    def build(self):
+        game=PongGame()
+        game.serve_ball()
+        Clock.schedule_interval(game.update, 1.0/60.0)
+        return game
 
-    def runTimer(self,endTime=None):
-        while self.formatTimer(endTime)!='00:00':
-            self.lbl['text']=self.formatTimer(endTime)
-            time.sleep(1)
-        self.lbl['text']='00:00'
-        
-    def quit(self,*args):
-        self.master.destroy()
-        self.finish=True
 
-root=tk.Tk()
-app=App(root)
-
-# def formatTimer(endTime):
-#     tmr=endTime-datetime.now()
-#     tmrSplit=str(tmr).split(':')
-#     return f'{tmrSplit[1]}:{tmrSplit[2][:2]}'
-
-# def runTimer(endTime=None):
-#     while formatTimer(endTime)!='00:00':
-#         lbl['text']=formatTimer(endTime)
-#         app.lbl['text']=lbl['text']
-#         print('updated clock...',lbl['text'])
-#         time.sleep(1)
-#         print('sleep for 1 sec...')
-#     print('00:00')
-
-# root.mainloop()
-
-finished=False
-while not finished:
-    #...
-    # osc_process()
-    root.update_idletasks()
-    root.update()
-    #...
-# osc_terminate()
+if __name__=='__main__':
+    PongApp().run()
