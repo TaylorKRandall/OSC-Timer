@@ -4,13 +4,12 @@ from osc4py3.as_allthreads import *
 from osc4py3 import oscmethod as osm
 # import threading
 
-def testOSC(*args):
-    for i in args:
-    	print(i)
+def testOSC(add, val):
+    print(add, val)
 
 def quitOSC(*args):
 	osc_terminate()
-	sys.exit(0)
+	sys.exit(1)
 
 def startOSC(*args):
 	print('you pressed start!')
@@ -22,4 +21,4 @@ osc_udp_server(IP,PORT,'testOSC')
 
 osc_method('/transport/pause',quitOSC)
 osc_method('/transport/start',startOSC)
-osc_method('/timer/*',testOSC)
+osc_method('*',testOSC, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)

@@ -1,0 +1,82 @@
+#:kivy 1.9.1
+
+MainWidget:
+    name: 'Test Fail'
+
+    screen_manager: sm
+
+    BoxLayout:
+        orientation: 'vertical'
+
+        ScreenManager:
+            id: sm
+            size_hint: (1,.8)
+
+            Screen1:
+                id: screen1
+            Screen2:
+                id: screen2
+
+        BoxLayout:
+            size_hint: (1,.2)
+            orientation: 'vertical'
+
+            GridLayout:
+                cols: 2
+
+                Button:
+                    text: 'Screen 1'
+                    on_release: sm.current = 'screen1'
+                Button:
+                    text: 'Screen 2'
+                    on_release: sm.current = 'screen2'
+
+<Screen1>:
+    name: 'screen1'
+    BoxLayout:
+        orientation: 'vertical'
+
+        Label:
+            id: status_text
+            text: 'This is screen 1'
+
+<Screen2>:
+    name: 'screen2'
+    BoxLayout:
+        orientation: 'vertical'
+
+        Label:
+            id: status_text
+            text: 'This is screen 2'
+
+        SliderScreen:
+
+<SliderScreen>:
+    BoxLayout:
+        orientation: 'horizontal'
+        #pos: 50, 50
+        padding:5
+        spacing:5
+        Slider:
+            max: 1500
+            orientation: 'vertical'
+            on_value: print(app.root, root.parent.parent.manager.parent.parent)
+            disabled: False
+        Slider:
+            max: 1500
+            orientation: 'vertical'
+            # Uncomment this next line for an exception at GUI build time
+            #value: app.root.numeric_value
+            disabled: True
+        Slider:
+            max: 1500
+            orientation: 'vertical'
+            # This avoids the exception, but simply doesn't work. The value is always 500.
+            value: app.root.numeric_value if app.root else 500
+            disabled: True
+        Slider:
+            max: 1500
+            orientation: 'vertical'
+            # This totally works, but is gawd awful
+            value: root.parent.parent.manager.parent.parent.numeric_value
+            disabled: True
