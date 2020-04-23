@@ -9,7 +9,8 @@ from kivy.properties import (
     NumericProperty, StringProperty, ObjectProperty)
 from kivy.event import EventDispatcher
 import time
-from osc4py3.as_allthreads import * # the allthreads option eliminates the need to declare osc_process() in the event loop
+# the allthreads option eliminates the need to declare osc_process() in the event loop
+from osc4py3.as_allthreads import *
 from osc4py3 import oscmethod as osm
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -23,10 +24,10 @@ osc_udp_server(IP, PORT, 'OSCtimer')
 # Config.set('graphics','fullscreen','auto')
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#~~works~~
-class OSC_Dispatcher(EventDispatcher):
-    def __init__(self,**kwargs):
-        super(OSC_Dispatcher,self).__init__(**kwargs)
+
+class Timer(Widget):
+    def __init__(self, **kwargs):
+        super(Timer, self).__init__(**kwargs)
         self.register_event_type('on_OSC')
 
     tempStr = StringProperty('0000')
@@ -45,68 +46,19 @@ class OSC_Dispatcher(EventDispatcher):
             print(e)
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-'''
-this works, but i think it would be best to move the event dispatcher inside
-of the Timer widget so that the timerStr is unique to that timer. Will this 
-be necessary with multiple timers?
-'''
-# osc = OSC_Dispatcher()
-
-# def OSC_handler(addr, val):
-#     osc.dispatch('on_OSC', addr, val)
-
-# osc_method('*',OSC_handler, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-class Timer(Widget):
-    
-    osc = OSC_Dispatcher()
-
-    def cb(self, addr, val):
-        print('cb():', self, addr, val)
-
-    # def updateTimer(self, addr, val):
-    #     if addr == '/numpad':
-    #         try:
-    #         # update tempStr
-    #             self.tempStr = self.tempStr[1:]+str(int(val))
-    #             print(self.tempStr)
-    #         except Exception as e:
-    #             print(e)
-    #     elif addr == '/enter':
-    #         # set timer text to tempStr
-    #         print('enter...')
-    #     elif addr == '/clear':
-    #         print('clear')
-    #     elif addr == '/start':
-    #         print('start...')
-    #     elif addr == '/pause':
-    #         print('pause...')
-
-    osc_method('*',osc.OSC_handler, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
-    #~~works~~
-
-    # def updateEndTime(self):
-    #     endTime=time.time()+self.seconds
-    #     return endTime
-
-    # def startTimer(self):
-    #     self.runTimer(self.updateEndTime())
-
-    # def runTimer(self,endTime):
-    #     print('starting timer...')
-    #     for i in range(self.seconds): # need to define seconds        
-    #         tmr=time.gmtime(endTime-time.time())
-    #         print(time.strftime('%H:%M:%S', tmr))
-    osc.bind(on_OSC=cb)
-
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 class TimerApp(App):
-    # osc_method('*',OSC_handler, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+
     def build(self):
-        return Timer()
+        t = Timer()
+
+        def cb(self, addr, val):
+            print('cb():', self, addr, val)
+
+        osc_method('*',t.OSC_handler, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
+        t.bind(on_OSC=cb)
+
+        return t
 
 if __name__ == '__main__':
     TimerApp().run()
