@@ -19,6 +19,6 @@ PORT=53000
 osc_startup()
 osc_udp_server(IP,PORT,'testOSC')
 
-osc_method('/transport/pause',quitOSC)
-osc_method('/transport/start',startOSC)
+osc_method('/pause',quitOSC)
+osc_method('/start',startOSC)
 osc_method('*',testOSC, argscheme=osm.OSCARG_ADDRESS + osm.OSCARG_DATAUNPACK)
