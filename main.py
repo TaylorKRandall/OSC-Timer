@@ -52,13 +52,9 @@ class Timer(Widget):
     def on_holdStr(self, inst, val):
         # update seconds when holdStr changes
         self.seconds = int(self.holdStr[2:]) + (int(self.holdStr[:2])*60)
-        # format seconds into string to display
-
-        # tmr = time.gmtime(self.updateEndTime()-time.time()+1)
-        # self.tmrStr = time.strftime('%M:%S', tmr)
-
         # update TouchOSC Label
-        oscLabel = oscbuildparse.OSCMessage('/1/label1', None, [val[:2]+':'+val[2:]])
+        tmr = time.gmtime(self.updateEndTime()-time.time()+1)
+        oscLabel = oscbuildparse.OSCMessage('/1/label1', None, [time.strftime('%M:%S', tmr)])
         osc_send(oscLabel, 'OSC_client')
     
     # shift holdStr left and append val to right
@@ -74,6 +70,7 @@ class Timer(Widget):
         self.tmrStr = time.strftime('%M:%S', tmr)
 
     def oscClearHandler(self, val):
+        self.isPaused = True
         self.holdStr = '0000'
         self.tmrStr = '00:00'
 
