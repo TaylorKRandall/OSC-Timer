@@ -3,21 +3,23 @@ import kivy
 from kivy.app import App 
 from kivy.clock import Clock 
 from kivy.uix.widget import Widget
-from kivy.uix.label import Label
 from kivy.config import Config
 from kivy.properties import StringProperty
 from kivy.event import EventDispatcher
 import time
 # the allthreads option eliminates the need to declare osc_process() in the event loop
 from osc4py3.as_allthreads import *
-from osc4py3 import oscmethod as osm
+from osc4py3 import oscbuildparse
 from functools import partial
 
 kivy.require('1.11.1')
-IP = '192.168.0.7'
-PORT = 53000
+IN_IP = '192.168.0.7'
+IN_PORT = 53000
+OUT_IP = '192.168.0.37'
+OUT_PORT = 53001
 osc_startup()
-osc_udp_server(IP, PORT, 'OSCtimer')
+osc_udp_server(IN_IP, IN_PORT, 'OSC_server')
+osc_udp_client(OUT_IP, OUT_PORT, 'OSC_client')
 # uncomment to go fullscreen
 # Config.set('graphics','fullscreen','auto')
 
@@ -31,7 +33,7 @@ class Timer(Widget):
         pass
 
     # place to hold input from OSC as MMSS
-    tempStr = StringProperty('0000')
+    holdStr = StringProperty('0000')
     # referenced by Label
     tmrStr = StringProperty('00:00')
     # seconds left on timer
@@ -45,18 +47,20 @@ class Timer(Widget):
         self.endTime=time.time()+self.seconds
         return self.endTime
 
-    def on_tempStr(self, inst, val):
-        # update seconds when tempStr changes
-        self.seconds = int(self.tempStr[2:]) + (int(self.tempStr[:2])*60)
+    def on_holdStr(self, inst, val):
+        # update seconds when holdStr changes
+        self.seconds = int(self.holdStr[2:]) + (int(self.holdStr[:2])*60)
         # format seconds into string to display
         tmr = time.gmtime(self.updateEndTime()-time.time()+1)
         self.tmrStr = time.strftime('%M:%S', tmr)
+        oscLabel = oscbuildparse.OSCMessage('/1/label1', None, [val])
+        osc_send(oscLabel, 'OSC_client')
     
-    # shift tempStr left and append val to right
+    # shift holdStr left and append val to right
     def oscNumpadHandler(self, val): # OSC Value
         # self.dispatch('on_OSC', val)
         if self.isPaused == True:
-            self.tempStr = self.tempStr[1:]+str(int(val))
+            self.holdStr = self.holdStr[1:]+str(int(val))
         else:
             pass
     # does nothing for now
@@ -64,7 +68,7 @@ class Timer(Widget):
         pass
 
     def oscClearHandler(self, val):
-        self.tempStr = '0000'
+        self.holdStr = '0000'
 
     def oscStartHandler(self, val):
         self.isPaused = False
@@ -78,12 +82,14 @@ class Timer(Widget):
         if tmr[4] + tmr[5] != 0 and self.isPaused == False:
             self.tmrStr = time.strftime('%M:%S', tmr)
         elif tmr[4] + tmr[5] != 0 and self.isPaused == True:
+            print('paused...')
             return False
         else:
-            # update one last time, reset tempStr, and unshedule Clock
-            print('runTimer() returning false...')
+            # update one last time, reset holdStr, and unshedule Clock
+            print('time ran out...')
             self.tmrStr = time.strftime('%M:%S', tmr)
-            self.tempStr = '0000'
+            self.holdStr = '0000'
+            self.isPaused = True
             return False
 
     def oscPauseHandler(self, val):
