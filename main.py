@@ -59,7 +59,6 @@ class Timer(Widget):
     
     # shift holdStr left and append val to right
     def oscNumpadHandler(self, val): # OSC Value
-        # self.dispatch('on_OSC', val)
         if self.isPaused == True:
             self.holdStr = self.holdStr[1:]+str(int(val))
         else:
@@ -110,16 +109,11 @@ class TimerApp(App):
     def build(self):
         t = Timer()
 
-        def cb(self, val):
-            # print('cb():', self, val)
-            pass
-
         osc_method('/numpad', t.oscNumpadHandler)
         osc_method('/enter', t.oscEnterHandler)
         osc_method('/clear', t.oscClearHandler)
         osc_method('/start', t.oscStartHandler)
         osc_method('/pause', t.oscPauseHandler)
-        t.bind(on_OSC=cb)
 
         return t
 
