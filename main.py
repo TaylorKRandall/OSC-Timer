@@ -13,8 +13,10 @@ from osc4py3 import oscbuildparse
 from functools import partial
 
 kivy.require('1.11.1')
+# set to match the timer's address/port
 IN_IP = '192.168.0.7'
 IN_PORT = 53000
+# set to address/port of device sending OSC commands
 OUT_IP = '192.168.0.37'
 OUT_PORT = 53001
 osc_startup()
@@ -51,9 +53,12 @@ class Timer(Widget):
         # update seconds when holdStr changes
         self.seconds = int(self.holdStr[2:]) + (int(self.holdStr[:2])*60)
         # format seconds into string to display
-        tmr = time.gmtime(self.updateEndTime()-time.time()+1)
-        self.tmrStr = time.strftime('%M:%S', tmr)
-        oscLabel = oscbuildparse.OSCMessage('/1/label1', None, [val])
+
+        # tmr = time.gmtime(self.updateEndTime()-time.time()+1)
+        # self.tmrStr = time.strftime('%M:%S', tmr)
+
+        # update TouchOSC Label
+        oscLabel = oscbuildparse.OSCMessage('/1/label1', None, [val[:2]+':'+val[2:]])
         osc_send(oscLabel, 'OSC_client')
     
     # shift holdStr left and append val to right
@@ -63,12 +68,14 @@ class Timer(Widget):
             self.holdStr = self.holdStr[1:]+str(int(val))
         else:
             pass
-    # does nothing for now
+    # format holdStr and update tmrStr
     def oscEnterHandler(self, val):
-        pass
+        tmr = time.gmtime(self.updateEndTime()-time.time()+1)
+        self.tmrStr = time.strftime('%M:%S', tmr)
 
     def oscClearHandler(self, val):
         self.holdStr = '0000'
+        self.tmrStr = '00:00'
 
     def oscStartHandler(self, val):
         self.isPaused = False
@@ -81,6 +88,8 @@ class Timer(Widget):
         # check if the time has run out
         if tmr[4] + tmr[5] != 0 and self.isPaused == False:
             self.tmrStr = time.strftime('%M:%S', tmr)
+            oscLabel = oscbuildparse.OSCMessage('/1/label1', None, [self.tmrStr])
+            osc_send(oscLabel, 'OSC_client')
         elif tmr[4] + tmr[5] != 0 and self.isPaused == True:
             print('paused...')
             return False
